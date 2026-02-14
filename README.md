@@ -3,40 +3,64 @@
 A comprehensive monitoring stack deployed on AWS using Prometheus for metrics collection, Grafana for visualization, and Alertmanager for notifications (Slack/Email).
 
 ## 🏗 Architecture
-*   **Infrastructure:** AWS EC2 (t3.medium), VPC, Security Groups.
-*   **Metrics Collection:** Prometheus (Scraping `node_exporter` targets).
-*   **Visualization:** Grafana (Dashboards for System Health).
-*   **Alerting:** Alertmanager (Routing alerts to Slack Channel & Email).
 
 ```mermaid
-graph TD
-    subgraph AWS_Cloud ["AWS Cloud"]
-        subgraph VPC ["VPC (10.0.0.0/16)"]
-            subgraph Public_Subnet ["Public Subnet (10.0.1.0/24)"]
-                subgraph SG ["Security Group"]
-                    subgraph EC2_Instance ["EC2 Instance (Ubuntu)"]
-                        NodeExporter["Node Exporter<br>(Port 9100)"]
-                        Prometheus["Prometheus<br>(Port 9090)"]
-                        Alertmanager["Alertmanager<br>(Port 9093)"]
-                        Grafana["Grafana<br>(Port 3000)"]
-                    end
+graph TB
+    %% External Access
+    User["👤 User"]
+    
+    %% AWS Cloud
+    subgraph AWS["☁️ AWS Cloud"]
+        subgraph VPC["VPC: 10.0.0.0/16"]
+            subgraph Subnet["Public Subnet"]
+                
+                subgraph Server["EC2 Instance (t3.medium)"]
+                    NodeExp["Node Exporter<br/>:9100"]
+                    Prom["Prometheus<br/>:9090"]
+                    AlertMgr["Alertmanager<br/>:9093"]
+                    Graf["Grafana<br/>:3000"]
                 end
+                
             end
         end
     end
-
-    User((User/Browser)) -->|HTTP| Grafana
-    User -->|HTTP| Prometheus
-    User -->|HTTP| Alertmanager
-
-    Prometheus -->|Scrapes Metrics| NodeExporter
-    Prometheus -->|Sends Alerts| Alertmanager
     
-    Grafana -->|Queries Data| Prometheus
+    %% External Services
+    Slack["Slack"]
+    Email["Email"]
     
-    Alertmanager -->|Notifications| Slack["Slack Channel"]
-    Alertmanager -->|Notifications| Email["Email (Gmail)"]
-```
+    %% Data Flow
+    User --> Graf
+    User --> Prom
+    
+    Prom <-->|Scrape| NodeExp
+    Graf <-->|Query| Prom
+    Prom -->|Alert| AlertMgr
+    
+    AlertMgr --> Slack
+    AlertMgr --> Email
+    
+    linkStyle default stroke:#7F00FF,stroke-width:2px
+    %% Styling
+    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:3px,color:#FFF
+    classDef vpc fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#FFF
+    classDef subnet fill:#50C878,stroke:#2D7A4A,stroke-width:2px,color:#FFF
+    classDef server fill:#E8EAF6,stroke:#5C6BC0,stroke-width:2px,color:#1A237E
+    classDef monitoring fill:#E53935,stroke:#C62828,stroke-width:2px,color:#FFF
+    classDef visualization fill:#F57C00,stroke:#E65100,stroke-width:2px,color:#FFF
+    classDef external fill:#26A69A,stroke:#00796B,stroke-width:2px,color:#FFF
+    classDef user fill:#66BB6A,stroke:#388E3C,stroke-width:2px,color:#FFF
+    
+    class AWS aws
+    class VPC vpc
+    class Subnet subnet
+    class Server server
+    class Prom,AlertMgr,NodeExp monitoring
+    class Graf visualization
+    class Slack,Email external
+    class User user
+    
+````
 
 ## 🚀 Components
 *   **Prometheus (v2.45.0):** Time-series database.
@@ -44,45 +68,9 @@ graph TD
 *   **Alertmanager:** Handles alert deduplication, grouping, and routing.
 *   **Node Exporter:** Exposes hardware and OS metrics.
 
-## 🛠 Prerequisites
-*   AWS CLI installed and configured.
-*   Git Bash or WSL (for running scripts on Windows).
-*   SSH Key Pair (`us-east1.pem`).
 
-## 📥 Installation
 
-### 1. Provision Infrastructure
-Run the provisioning script to create VPC, Security Groups, and EC2 Instance.
-```bash
-cd scripts
-./provision-aws-infrastructure.sh
-```
-
-### 2. Install Services
-SSH into the provisioned instance and run the installation scripts.
-```bash
-# Upload scripts and config
-scp -i "keys/us-east1.pem" scripts/*.sh config/*.yml ubuntu@<PublicIP>:~
-
-# SSH into instance
-ssh -i "keys/us-east1.pem" ubuntu@<PublicIP>
-
-# Run Installers
-chmod +x *.sh
-./install-prometheus.sh
-./install-node-exporter.sh
-./install-alertmanager.sh
-./install-grafana.sh
-```
-
-### 3. Configure Alerts
-Update `config/alertmanager.yml` with your SMTP and Slack Webhook details, then apply:
-```bash
-sudo mv ~/alertmanager.yml /etc/alertmanager/alertmanager.yml
-sudo systemctl restart alertmanager
-```
-
-## 📊 Access Dshboards
+## 📊 Access Dashboards
 
 | Service | URL | Default Creds |
 | :--- | :--- | :--- |
@@ -95,3 +83,6 @@ sudo systemctl restart alertmanager
 *   **HostHighCpuLoad:** Triggers when CPU usage > 80% for 2 minutes.
 *   **HostHighMemoryUsage:** Triggers when Memory usage > 90% for 2 minutes.
 *   **HostOutOfDiskSpace:** Triggers when Disk usage > 90% for 2 minutes.
+
+
+## Documentation formatting and structure assisted by AI tools
