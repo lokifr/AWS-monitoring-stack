@@ -1,0 +1,36 @@
+global:
+  resolve_timeout: 5m
+  
+  # --- SMTP / Email Config (Gmail Example) ---
+  # Only needed if you want email alerts
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'YOUR_EMAIL@gmail.com'
+  smtp_auth_username: 'YOUR_EMAIL@gmail.com'
+  # For Gmail, this must be an 'App Password', not your login password
+  smtp_auth_password: 'YOUR_APP_PASSWORD'
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  
+  # Default receiver connects to both
+  receiver: 'email-and-slack'
+
+receivers:
+  - name: 'email-and-slack'
+    
+    # --- Email Receiver ---
+    email_configs:
+      - to: 'RECIPIENT_EMAIL@example.com'
+        send_resolved: true
+
+    # --- Slack Receiver ---
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK_URL'
+        channel: '#alerts' # Ensure this channel exists in your Slack
+        send_resolved: true
+        title: '{{ .CommonAnnotations.summary }}'
+        text: '{{ .CommonAnnotations.description }}'

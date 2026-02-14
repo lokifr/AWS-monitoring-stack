@@ -1,0 +1,10 @@
+# Start a new git repository
+*.pem
+*.key
+.DS_Store
+
+# Ignore actual config with secrets
+config/alertmanager.yml
+
+# Keep the example config
+!config/alertmanager.example.yml
