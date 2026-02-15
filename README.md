@@ -10,64 +10,9 @@
 A comprehensive monitoring stack deployed on AWS using Prometheus for metrics collection, Grafana for visualization, and Alertmanager for notifications (Slack/Email).
 
 ## 🏗 Architecture
+<img width="774" height="814" alt="Screenshot 2026-02-15 103908" src="https://github.com/user-attachments/assets/7517126c-f2a9-4cae-a048-546e1fbe3378" />
 
-```mermaid
-graph TB
-    %% External Access
-    User["👤 User"]
-    
-    %% AWS Cloud
-    subgraph AWS["☁️ AWS Cloud"]
-        subgraph VPC["VPC: 10.0.0.0/16"]
-            subgraph Subnet["Public Subnet"]
-                
-                subgraph Server["EC2 Instance (t3.medium)"]
-                    NodeExp["Node Exporter<br/>:9100"]
-                    Prom["Prometheus<br/>:9090"]
-                    AlertMgr["Alertmanager<br/>:9093"]
-                    Graf["Grafana<br/>:3000"]
-                end
-                
-            end
-        end
-    end
-    
-    %% External Services
-    Slack["Slack"]
-    Email["Email"]
-    
-    %% Data Flow
-    User --> Graf
-    User --> Prom
-    
-    Prom <-->|Scrape| NodeExp
-    Graf <-->|Query| Prom
-    Prom -->|Alert| AlertMgr
-    
-    AlertMgr --> Slack
-    AlertMgr --> Email
-    
-    linkStyle default stroke:#7F00FF,stroke-width:2px
-    %% Styling
-    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:3px,color:#FFF
-    classDef vpc fill:#4A90E2,stroke:#2E5C8A,stroke-width:2px,color:#FFF
-    classDef subnet fill:#50C878,stroke:#2D7A4A,stroke-width:2px,color:#FFF
-    classDef server fill:#E8EAF6,stroke:#5C6BC0,stroke-width:2px,color:#1A237E
-    classDef monitoring fill:#E53935,stroke:#C62828,stroke-width:2px,color:#FFF
-    classDef visualization fill:#F57C00,stroke:#E65100,stroke-width:2px,color:#FFF
-    classDef external fill:#26A69A,stroke:#00796B,stroke-width:2px,color:#FFF
-    classDef user fill:#66BB6A,stroke:#388E3C,stroke-width:2px,color:#FFF
-    
-    class AWS aws
-    class VPC vpc
-    class Subnet subnet
-    class Server server
-    class Prom,AlertMgr,NodeExp monitoring
-    class Graf visualization
-    class Slack,Email external
-    class User user
-    
-````
+
 
 ## 🚀 Components
 *   **Prometheus (v2.45.0):** Time-series database.
